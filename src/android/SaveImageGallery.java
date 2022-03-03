@@ -67,7 +67,7 @@ public class SaveImageGallery extends CordovaPlugin {
             } else {
                 Log.d("SaveImageGallery", "Requesting permissions for WRITE_EXTERNAL_STORAGE");
                 PermissionHelper.requestPermission(this, WRITE_PERM_REQUEST_CODE, WRITE_EXTERNAL_STORAGE);
-            } 
+            }
         }
 
         return true;
@@ -161,29 +161,23 @@ public class SaveImageGallery extends CordovaPlugin {
         File retVal = null;
 
         try {
-            String deviceVersion = Build.VERSION.RELEASE;
             Calendar c = Calendar.getInstance();
             String date = EMPTY_STR + c.get(Calendar.YEAR) + c.get(Calendar.MONTH) + c.get(Calendar.DAY_OF_MONTH)
                     + c.get(Calendar.HOUR_OF_DAY) + c.get(Calendar.MINUTE) + c.get(Calendar.SECOND);
 
-            int check = deviceVersion.compareTo("2.3.3");
-
             File folder;
 
-            /*
-             * File path = Environment.getExternalStoragePublicDirectory(
-             * Environment.DIRECTORY_PICTURES ); //this throws error in Android
-             * 2.2
-             */
-            if (check >= 1) {
+            if (Build.VERSION.SDK_INT >= 30) {
+                // @see https://developer.android.com/about/versions/11/privacy/storage
+                folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
                 folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
-
             } else {
                 folder = Environment.getExternalStorageDirectory();
+            }
+
+            if (!folder.exists()) {
+                folder.mkdirs();
             }
 
             // building the filename
@@ -243,7 +237,7 @@ public class SaveImageGallery extends CordovaPlugin {
 				return;
 			}
 		}
-		
+
 		switch (requestCode) {
 		case WRITE_PERM_REQUEST_CODE:
 			Log.d("SaveImageGallery", "User granted the permission for WRITE_EXTERNAL_STORAGE");
